@@ -7,7 +7,7 @@ class LoginPage {
     this.errorMessage = page.locator('[data-test="error"]');
     this.errorCloseButton = page.locator('.error-button');
   }
-
+  
   async navigate() {
     await this.page.goto('/');
   }
