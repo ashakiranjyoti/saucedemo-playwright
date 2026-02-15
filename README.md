@@ -22,3 +22,21 @@ End-to-end test automation framework for SauceDemo using Playwright.
 git clone [https://github.com/ashakiranjyoti/saucedemo-playwright.git](https://github.com/ashakiranjyoti/saucedemo-playwright.git)
 cd saucedemo-playwright
 npm install
+
+Running Tests
+Run all tests:
+npx playwright test
+
+Run specific browser:
+
+bash
+npx playwright test --project=chromium
+# or
+npx playwright test --project=firefox
+
+Test Structure
+tests/ - Contains all test files
+pages/ - Page object models
+data/ - Test data files
+CI/CD
+Tests run automatically on push and pull requests via GitHub Actions.
