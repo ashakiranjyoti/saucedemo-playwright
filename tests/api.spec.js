@@ -1,9 +1,11 @@
 const { test, expect } = require('@playwright/test');
 
-test('API GET Users', async ({ request }) => {
-  const response = await request.get('https://reqres.in/api/users/2');
+test('JSONPlaceholder API Test', async ({ request }) => {
+  const response = await request.get('https://jsonplaceholder.typicode.com/posts/1');
+
   expect(response.status()).toBe(200);
 
   const body = await response.json();
-  expect(body.data.id).toBe(2);
+  expect(body.id).toBe(1);
 });
+
