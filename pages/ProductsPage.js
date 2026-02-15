@@ -2,7 +2,8 @@
 class ProductsPage {
   constructor(page) {
     this.page = page;
-    this.cartBadge = page.locator('.shopping_cart_link');
+    this.cartBadge = page.locator('.shopping_cart_badge');
+    this.cartLink = page.locator('.shopping_cart_link');
   }
 
   async addProductToCart(productName) {
@@ -14,6 +15,7 @@ class ProductsPage {
   }
 
   async removeProductFromCart(productName) {
+    // Find product by exact name
     const product = this.page.locator('.inventory_item')
       .filter({ has: this.page.getByText(productName, { exact: true }) });
     
@@ -21,9 +23,21 @@ class ProductsPage {
   }
 
   async goToCart() {
-    await this.cartIcon.click();
+    await this.cartLink.click();
   }
   
+  async getProductByName(productName) {
+    const product = this.page.locator('.inventory_item')
+      .filter({ has: this.page.getByText(productName, { exact: true }) });
+    return {
+      button: product.locator('button')
+    };
+  }
+  
+  async getCartBadgeCount() {
+    const count = await this.cartBadge.textContent();
+    return parseInt(count, 10);
+  }
 }
 
 module.exports = ProductsPage;

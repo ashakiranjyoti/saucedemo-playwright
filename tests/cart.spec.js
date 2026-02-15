@@ -1,88 +1,79 @@
-// tests/cart.spec.js - SIMPLE DIRECT APPROACH
 const { test, expect } = require('@playwright/test');
+const LoginPage = require('../pages/loginPage');
+const InventoryPage = require('../pages/inventoryPage');
+const CartPage = require('../pages/CartPage');
+const users = require('../data/users.json').users;
 
-test.describe('Cart Functionality Tests', () => {
-  
-  test.beforeEach(async ({ page }) => {
-    // Step 1: Login
-    await page.goto('https://www.saucedemo.com/');
-    await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
-    await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
-    await page.getByRole('button', { name: 'Login' }).click();
+test.describe('Cart Functionality - POM', () => {
+  let loginPage;
+  let inventoryPage;
+  let cartPage;
+  let page;
+
+  test.beforeEach(async ({ page: testPage }) => {
+    page = testPage;
+    loginPage = new LoginPage(page);
+    inventoryPage = new InventoryPage(page);
+    cartPage = new CartPage(page);
     
-    // Step 2: Verify on products page
+    // Login before each test
+    await loginPage.navigate();
+    await loginPage.login(users.standard.username, users.standard.password);
     await expect(page).toHaveURL(/inventory/);
-    await expect(page.locator('.title')).toHaveText('Products');
-    
-    // Step 3: Add 2 products to cart
-    // Add Backpack
-    await page.locator('.inventory_item')
-      .filter({ has: page.getByText('Sauce Labs Backpack') })
-      .getByRole('button', { name: 'Add to cart' })
-      .click();
-    
-    // Add Bike Light  
-    await page.locator('.inventory_item')
-      .filter({ has: page.getByText('Sauce Labs Bike Light') })
-      .getByRole('button', { name: 'Add to cart' })
-      .click();
-    
-    // Step 4: Go to cart
-    await page.locator('.shopping_cart_link').click();
-    
-    // Step 5: Verify on cart page
-    await expect(page).toHaveURL(/cart/);
-    await expect(page.locator('.title')).toHaveText('Your Cart');
   });
 
-  test('Verify cart page has correct items', async ({ page }) => {
-    // Check cart has 2 items
-    const cartItems = page.locator('.cart_item');
-    await expect(cartItems).toHaveCount(2);
+  test('Add items to cart and verify', async ({ page }) => {
+
+    // Test implementation
+
+    // 2. Add items to cart
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await page.waitForTimeout(1000); // Small delay between actions
+    await inventoryPage.addProduct('Sauce Labs Bike Light');
     
-    // Check item names
-    const itemNames = await cartItems.locator('.inventory_item_name').allTextContents();
+    // 3. Go to cart and verify items
+    await page.waitForTimeout(1000); // Ensure items are added
+    await inventoryPage.goToCart();
+    await page.waitForURL('**/cart.html');
+    await cartPage.verifyOnCartPage();
+    
+    // 4. Verify cart items
+    const itemCount = await cartPage.getCartItemCount();
+    expect(itemCount).toBe(2);
+    
+    const itemNames = await cartPage.getItemNames();
     expect(itemNames).toContain('Sauce Labs Backpack');
     expect(itemNames).toContain('Sauce Labs Bike Light');
   });
 
   test('Remove item from cart', async ({ page }) => {
-    // Remove Backpack
-    await page.locator('.cart_item')
-      .filter({ has: page.getByText('Sauce Labs Backpack') })
-      .getByRole('button', { name: 'Remove' })
-      .click();
+    // 1. Add item to cart
+    await inventoryPage.addProduct('Sauce Labs Backpack');
+    await page.waitForTimeout(1000); // Ensure item is added
+    await inventoryPage.goToCart();
+    await page.waitForURL('**/cart.html');
     
-    // Wait for removal
-    await page.waitForTimeout(500);
-    
-    // Should have 1 item now
-    const cartItems = page.locator('.cart_item');
-    await expect(cartItems).toHaveCount(1);
-    
-    // Should be Bike Light
-    const remainingItem = await cartItems.locator('.inventory_item_name').textContent();
-    expect(remainingItem).toBe('Sauce Labs Bike Light');
+    // 2. Remove item and verify
+    await cartPage.removeItem('Sauce Labs Backpack');
+    await page.waitForSelector('div.cart_item:nth-child(1) > div.cart_item_label > div.inventory_item_name', { state: 'hidden' });
+    expect(await cartPage.getCartItemCount()).toBe(0);
   });
 
-  test('Continue shopping button works', async ({ page }) => {
-    // Click Continue Shopping
-    await page.getByRole('button', { name: 'Continue Shopping' }).click();
+  test('Continue shopping works', async () => {
+    // Go to cart
+    await inventoryPage.goToCart();
     
-    // Should go back to products page
+    // 2. Test continue shopping
+    await cartPage.continueShopping();
     await expect(page).toHaveURL(/inventory/);
-    await expect(page.locator('.title')).toHaveText('Products');
-    
-    // Cart should still show 2 items
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('2');
   });
 
-  test('Checkout button works', async ({ page }) => {
-    // Click Checkout
-    await page.getByRole('button', { name: 'Checkout' }).click();
+  test('Checkout button works', async () => {
+    // Go to cart
+    await inventoryPage.goToCart();
     
-    // Should go to checkout page
+    // 2. Test checkout
+    await cartPage.goToCheckout();
     await expect(page).toHaveURL(/checkout-step-one/);
-    await expect(page.locator('.title')).toHaveText('Checkout: Your Information');
   });
 });

@@ -1,64 +1,57 @@
 const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/loginPage');
+const ProductsPage = require('../pages/ProductsPage');
 const users = require('../data/users.json').users;
 
-// ✅ Simple tests without complex Page Objects
-test.describe('Products Page Tests', () => {
-  
-  test.beforeEach(async ({ page }) => {
-    // Direct login
-    await page.goto('https://www.saucedemo.com/');
-    await page.getByRole('textbox', { name: 'Username' }).fill(users.standard.username);
-    await page.getByRole('textbox', { name: 'Password' }).fill(users.standard.password);
-    await page.getByRole('button', { name: 'Login' }).click();
+test.describe('Products Page Tests - POM', () => {
+  let loginPage;
+  let productsPage;
+  let page;
+
+  test.beforeEach(async ({ page: testPage }) => {
+    page = testPage;
+    loginPage = new LoginPage(page);
+    productsPage = new ProductsPage(page);
     
-    // Wait for products page
+    // Login before each test
+    await loginPage.navigate();
+    await loginPage.login(users.standard.username, users.standard.password);
     await expect(page).toHaveURL(/inventory/);
-    await expect(page.locator('.title')).toHaveText('Products');
   });
 
-  // ✅ TEST 1: Add to cart
-  test('Add product to cart', async ({ page }) => {
-    // Get first product name
-    const firstProduct = page.locator('.inventory_item_name').first();
-    const productName = await firstProduct.textContent();
+  test('Add and remove product from cart', async () => {
+    const productName = 'Sauce Labs Backpack';
     
-    // Add to cart
-    await page.locator('.inventory_item')
-      .filter({ hasText: productName })
-      .getByRole('button', { name: 'Add to cart' })
-      .click();
+    // Add product to cart
+    await productsPage.addProductToCart(productName);
     
-    // Verify
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    // Verify cart badge updates
+    await expect(productsPage.cartBadge).toHaveText('1');
+    
+    // Verify button text changes to 'Remove'
+    const product = await productsPage.getProductByName(productName);
+    await expect(product.button).toContainText('Remove');
   });
 
-  // ✅ TEST 2: Remove from cart
-  test('Remove product from cart', async ({ page }) => {
-    // First add
-    const firstProduct = page.locator('.inventory_item_name').first();
-    const productName = await firstProduct.textContent();
+  test('Remove product from cart', async () => {
+    const productName = 'Sauce Labs Backpack';
     
-    await page.locator('.inventory_item')
-      .filter({ hasText: productName })
-      .getByRole('button', { name: 'Add to cart' })
-      .click();
+    // First add the product
+    await productsPage.addProductToCart(productName);
+    await expect(productsPage.cartBadge).toHaveText('1');
     
-    // Verify added
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    // Then remove it
+    await productsPage.removeProductFromCart(productName);
     
-    // Remove
-    await page.locator('.inventory_item')
-      .filter({ hasText: productName })
-      .getByRole('button', { name: 'Remove' })
-      .click();
+    // Verify cart badge is not visible
+    await expect(productsPage.cartBadge).toBeHidden();
     
-    // Verify removed
-    await expect(page.locator('.shopping_cart_badge')).toBeHidden();
+    // Verify button text changes back to 'Add to cart'
+    const product = await productsPage.getProductByName(productName);
+    await expect(product.button).toContainText('Add to cart');
   });
 
-  // ✅ TEST 3: Add multiple products
-  test('Add multiple products to cart', async ({ page }) => {
+  test('Add multiple products to cart', async () => {
     // Add first 2 products
     const products = page.locator('.inventory_item_name');
     const count = Math.min(await products.count(), 2);
@@ -76,8 +69,7 @@ test.describe('Products Page Tests', () => {
     }
   });
 
-  // ✅ TEST 4: Go to cart
-  test('Navigate to cart page', async ({ page }) => {
+  test('Navigate to cart page', async () => {
     // Add item first
     const firstProduct = page.locator('.inventory_item_name').first();
     const productName = await firstProduct.textContent();
