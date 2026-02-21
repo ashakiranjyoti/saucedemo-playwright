@@ -7,7 +7,7 @@ class InventoryPage {
   }
 
   async addProduct(productName) {
-    const product = this.page.locator('.inventory_item')
+    const product = this.page.locator('.inventory_item') 
       .filter({ has: this.page.getByText(productName, { exact: true }) });
     await product.getByRole('button', { name: 'Add to cart' }).click();
   }
