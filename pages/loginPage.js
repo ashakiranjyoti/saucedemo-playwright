@@ -49,7 +49,7 @@ class LoginPage {
     } catch (e) {
       console.log('Error clearing message:', e.message);
     }
-  }
+  } 
 
   async isLoginPageLoaded() {
     return await this.loginButton.isVisible();
