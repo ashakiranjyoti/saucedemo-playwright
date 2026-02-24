@@ -7,7 +7,7 @@ test.describe('Products Page Tests - POM', () => {
   let loginPage;
   let productsPage;
   let page;
-
+  
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage;
     loginPage = new LoginPage(page);
