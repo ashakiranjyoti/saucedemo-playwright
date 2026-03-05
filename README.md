@@ -1,7 +1,9 @@
 # SauceDemo E2E Test Automation
 
-[![CI](https://github.com/yourusername/saucedemo-playwright/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/saucedemo-playwright/actions)
-
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-blue?logo=githubactions)
+![Playwright](https://img.shields.io/badge/Tested%20with-Playwright-green?logo=playwright)
+![Node](https://img.shields.io/badge/Node.js-18%2B-brightgreen?logo=nodedotjs)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 End-to-end test automation framework for SauceDemo using Playwright.
 
 ## Features
