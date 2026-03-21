@@ -7,7 +7,7 @@
 ![POM](https://img.shields.io/badge/Pattern-Page_Object_Model-blueviolet?style=for-the-badge)
 ![Allure](https://img.shields.io/badge/Allure-Report-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)
-![CI](https://img.shields.io/github/actions/workflow/status/ashakiran_jyoti/saucedemo-playwright/playwright.yml?style=for-the-badge&label=CI&logo=github)
+![CI](https://img.shields.io/github/actions/workflow/status/ashakiranjyoti/saucedemo-playwright/playwright.yml?style=for-the-badge&label=CI&logo=github)
 
 ---
 
